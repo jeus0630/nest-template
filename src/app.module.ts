@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { envConfig } from './config/env.config';
 import { HealthCheckController } from './health-check/health-check.controller';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -19,12 +20,13 @@ import { HealthCheckController } from './health-check/health-check.controller';
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_SCHEMA,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      entities: [__dirname + '/**/*.entity.{ts,js}'],
       synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
       logging: true,
     }),
     TerminusModule,
     HttpModule,
+    UserModule,
   ],
   controllers: [AppController, HealthCheckController],
   providers: [AppService],

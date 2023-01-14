@@ -8,5 +8,3 @@ export const envConfig: ConfigModuleOptions = {
       ? '.stage.env'
       : '.development.env',
 };
-
-console.log(envConfig);

@@ -11,5 +11,3 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
   logging: true,
 };
-
-console.log(typeORMConfig);

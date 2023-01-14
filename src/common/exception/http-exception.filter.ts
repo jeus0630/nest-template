@@ -18,6 +18,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const req = ctx.getRequest<Request>();
 
     if (!(exception instanceof HttpException)) {
+      this.logger.error(exception);
       exception = new InternalServerErrorException();
     }
 
@@ -26,7 +27,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const stack = exception.stack;
 
     const log = {
-      timestamp: new Date(),
       url: req.url,
       response,
       stack,

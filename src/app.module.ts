@@ -9,9 +9,11 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { envConfig } from './config/env.config';
 import { HealthCheckController } from './health-check/health-check.controller';
 import { UserModule } from './user/user.module';
-import { APP_GUARD } from '@nestjs/core';
-import { RateLimiterGuard, RateLimiterModule } from 'nestjs-rate-limiter';
 import { TypeOrmConfig } from './config/tyeporm.config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerConfig } from './config/throttler.config';
+import { APP_GUARD } from '@nestjs/core';
+console.log(__dirname);
 
 @Module({
   imports: [
@@ -20,12 +22,16 @@ import { TypeOrmConfig } from './config/tyeporm.config';
       imports: [ConfigModule],
       useClass: TypeOrmConfig,
     }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: ThrottlerConfig,
+    }),
     TerminusModule,
     HttpModule,
     UserModule,
   ],
   controllers: [AppController, HealthCheckController],
-  providers: [AppService, { provide: APP_GUARD, useClass: RateLimiterGuard }],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

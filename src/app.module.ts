@@ -9,27 +9,23 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { envConfig } from './config/env.config';
 import { HealthCheckController } from './health-check/health-check.controller';
 import { UserModule } from './user/user.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RateLimiterGuard, RateLimiterModule } from 'nestjs-rate-limiter';
+import { TypeOrmConfig } from './config/tyeporm.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot(envConfig),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DATABASE_HOST,
-      port: Number(process.env.DATABASE_PORT),
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_SCHEMA,
-      entities: [__dirname + '/**/*.entity.{ts,js}'],
-      synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
-      logging: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: TypeOrmConfig,
     }),
     TerminusModule,
     HttpModule,
     UserModule,
   ],
   controllers: [AppController, HealthCheckController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: RateLimiterGuard }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

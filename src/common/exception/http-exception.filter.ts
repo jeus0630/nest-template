@@ -23,7 +23,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (!(exception instanceof HttpException)) {
       this.logger.error(exception);
       exception = new InternalServerErrorException(
-        `${exception.name} ${exception.message}`,
+        `Name: ${exception.name}
+        Message: ${exception.message}`,
       );
     }
 
@@ -33,7 +34,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         slackErrorType: 'Internal Server Error',
         slackErrorMessage: `
         URL: ${url}
-        Error: ${exception.message}
+        ${exception.message}
         Time: ${new Date(
           new Date().getTime() +
             new Date().getTimezoneOffset() * 60 * 1000 +

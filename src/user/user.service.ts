@@ -32,7 +32,7 @@ export class UserService {
     });
 
     if (duplicatedUser) {
-      throw new ConflictException();
+      throw new ConflictException('중복된 이메일 입니다.');
     }
 
     const salt = await bcrypt.genSalt();
@@ -54,14 +54,14 @@ export class UserService {
 
     const user = await this.userRepository.findOne({ where: { email } });
     const accessToken = await this.jwtService.sign({ email });
-    const { id } = user;
+    const id = user?.id;
 
     if (!user) {
-      throw new NotFoundException();
+      throw new NotFoundException('이메일을 확인해 주세요.');
     }
 
     if (!(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('비밀번호를 확인해 주세요.');
     }
 
     return {

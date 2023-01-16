@@ -6,7 +6,6 @@ import {
   Post,
   UseGuards,
   Get,
-  NotFoundException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -22,6 +21,7 @@ import {
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 import { Token } from 'src/common/auth/token.decorator';
 import {
@@ -104,6 +104,13 @@ export class UserController {
   @ApiUnauthorizedResponse({
     description: '인증 실패',
     type: UnauthorizedExceptionDto,
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'number',
+    description: '유저 id',
+    example: 1,
+    required: true,
   })
   @Get('/:id')
   @UseGuards(AuthGuard())

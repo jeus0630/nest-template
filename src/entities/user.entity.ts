@@ -23,8 +23,9 @@ export class User extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 100,
+    nullable: true,
   })
-  password: string;
+  password?: string;
 
   @Column({
     type: 'varchar',

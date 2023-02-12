@@ -100,10 +100,7 @@ export class UserController {
     @Res() res: Response,
   ): Promise<Response<Partial<SigninResponseDto>, Record<string, any>>> {
     const response = await this.userService.signIn(req);
-    const {
-      refreshToken: { refreshTokenId, refreshToken },
-      accessToken,
-    } = response;
+    const { refreshToken, accessToken } = response;
 
     res.cookie('refreshToken', refreshToken, {
       maxAge: 24 * 60 * 60 * 1000 * 365,
@@ -116,11 +113,10 @@ export class UserController {
       message: '로그인 성공',
       id: response.id,
       accessToken: accessToken,
-      uuid: refreshTokenId,
     });
   }
 
-  @Get('refresh/:uuid')
+  @Get('refresh/:id')
   @ApiOperation({ summary: '토큰 재발급' })
   @ApiOkResponse({
     description: '재발급 성공',
@@ -133,12 +129,12 @@ export class UserController {
   async updateAccessToken(
     @Req() req: Request,
     @Res() res: Response,
-    @Param('uuid') uuid: string,
+    @Param('id') id: string,
   ): Promise<Response<UpdateAccessTokenResponseDto>> {
     const { message, accessToken } = await this.userService.updateAccessToken(
       req,
       res,
-      uuid,
+      id,
     );
 
     return res.send({
@@ -147,7 +143,7 @@ export class UserController {
     });
   }
 
-  @Post('/signout')
+  @Post('/:id/signout')
   @ApiOperation({ summary: '로그아웃' })
   @ApiBearerAuth()
   @ApiSecurity('access-token')
@@ -160,8 +156,8 @@ export class UserController {
     type: UnauthorizedExceptionDto,
   })
   @UseGuards(AuthGuard())
-  async signout(): Promise<SignoutResponseDto> {
-    return await this.userService.signOut();
+  async signout(@Param() id: string): Promise<SignoutResponseDto> {
+    return await this.userService.signOut(+id);
   }
 
   @ApiOperation({ summary: '프로필 조회' })

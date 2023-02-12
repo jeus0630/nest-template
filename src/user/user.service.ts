@@ -21,7 +21,6 @@ import {
   UserFindResponseDto,
 } from './dto/user.response.dto';
 import { Cache } from 'cache-manager';
-import { v4 } from 'uuid';
 import { Request, Response } from 'express';
 
 @Injectable()
@@ -61,10 +60,7 @@ export class UserService {
     return await this.jwtService.sign({ email });
   }
 
-  private async _createRefreshToken(
-    email,
-  ): Promise<{ refreshTokenId: string; refreshToken: string }> {
-    const refreshTokenId = v4();
+  private async _createRefreshToken(email, id): Promise<string> {
     const refreshToken = await this.jwtService.sign(
       { email },
       {
@@ -73,18 +69,15 @@ export class UserService {
       },
     );
 
-    this.cacheManager.set(refreshTokenId, refreshToken);
+    this.cacheManager.set(id, refreshToken);
 
-    return { refreshTokenId, refreshToken };
+    return refreshToken;
   }
 
   async signIn(req: SigninRequestDto): Promise<SigninResponseDto> {
     const { email, password } = req;
 
     const user = await this.userRepository.findOne({ where: { email } });
-    const accessToken = await this._createAccessToken(email);
-    const refreshToken = await this._createRefreshToken(email);
-
     const id = user?.id;
 
     if (!user) {
@@ -94,6 +87,9 @@ export class UserService {
     if (!(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 확인해 주세요.');
     }
+
+    const accessToken = await this._createAccessToken(email);
+    const refreshToken = await this._createRefreshToken(email, id);
 
     return {
       message: '로그인 성공',
@@ -106,12 +102,12 @@ export class UserService {
   async updateAccessToken(
     req: Request,
     res: Response,
-    uuid: string,
+    id: string,
   ): Promise<UpdateAccessTokenResponseDto> {
     try {
       const refreshTokenFromCookie = req.cookies['refreshToken'];
 
-      if (!(await this.cacheManager.get(uuid)) == refreshTokenFromCookie) {
+      if (!(await this.cacheManager.get(id)) == refreshTokenFromCookie) {
         throw new UnauthorizedException();
       }
 
@@ -120,9 +116,9 @@ export class UserService {
       });
 
       const accessToken = await this._createAccessToken(email);
-      const { refreshToken } = await this._createRefreshToken(email);
+      const refreshToken = await this._createRefreshToken(email, id);
 
-      await this.cacheManager.del(uuid);
+      await this.cacheManager.del(id);
 
       res.cookie('refreshToken', refreshToken, {
         maxAge: 24 * 60 * 60 * 1000 * 365,
@@ -136,7 +132,7 @@ export class UserService {
         accessToken,
       };
     } catch (error) {
-      await this.cacheManager.del(uuid);
+      await this.cacheManager.del(id);
       res.cookie('refreshToken', '', {
         expires: new Date(1),
         httpOnly: true,
@@ -146,7 +142,9 @@ export class UserService {
     }
   }
 
-  async signOut(): Promise<SignoutResponseDto> {
+  async signOut(id): Promise<SignoutResponseDto> {
+    await this.cacheManager.del(id);
+
     return {
       message: '로그아웃 성공',
     };

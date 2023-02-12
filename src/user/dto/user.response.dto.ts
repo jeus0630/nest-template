@@ -33,14 +33,11 @@ export class SigninResponseDto {
   readonly accessToken: string;
 
   @ApiProperty({
-    example: {
-      refreshTokenId: 'uuid',
-      refreshToken:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiY2RAZ21haWwuY29tIiwiaWF0IjoxNjczNzE3NzY0LCJleHAiOjE2NzM4MDQxNjR9.Dt-ZEi5usAKwNTcdp1UlXNcMJiaPwkkYsbJeMsCG0ec',
-    },
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFiY2RAZ21haWwuY29tIiwiaWF0IjoxNjczNzE3NzY0LCJleHAiOjE2NzM4MDQxNjR9.Dt-ZEi5usAKwNTcdp1UlXNcMJiaPwkkYsbJeMsCG0ec',
     description: '리프레시 토큰',
   })
-  readonly refreshToken: { refreshTokenId: string; refreshToken: string };
+  readonly refreshToken: string;
 }
 
 export class UpdateAccessTokenResponseDto {
